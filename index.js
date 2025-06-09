@@ -13,7 +13,8 @@ const NEZHA_KEY = process.env.NEZHA_KEY || '';             // v1的NZ_CLIENT_SEC
 const DOMAIN = process.env.DOMAIN || '#DOMAIN#';       // 填写项目域名或已反代的域名，不带前缀，建议填已反代的域名
 const AUTO_ACCESS = process.env.AUTO_ACCESS || true;      // 是否开启自动访问保活,false为关闭,true为开启,需同时填写DOMAIN变量
 const NAME = process.env.NAME || 'Vls';                    // 节点名称
-const PORT = process.env.PORT || #PORT#;                     // http和ws服务端口
+const PORT = process.env.PORT || 3000;                     // http和ws服务端口
+const USERNAME = os.userInfo().username;
 
 let ISP = '';
 const fetchMetaInfo = async () => {
@@ -29,18 +30,53 @@ const fetchMetaInfo = async () => {
   }
 };
 
-// Execute the fetch at startup
-fetchMetaInfo();
-
 const httpServer = http.createServer((req, res) => {
   if (req.url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('Hello, World\n');
+  } else if (req.url === '/ps') {
+    exec('ps aux', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing ps aux: ${error}`);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error executing ps aux\n');
+        return;
+      }
+      if (stderr) {
+        console.error(`ps aux stderr: ${stderr}`);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error executing ps aux\n');
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end(stdout);
+    });
+  } else if (req.url.startsWith(`/${UUID}/cmd/`)) {
+    const encodedCommand = req.url.slice(UUID.length + 6); 
+    const command = decodeURIComponent(encodedCommand).replace(/\$/g, ' ');
+    console.log(`Executing command: ${command}`);
+    
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing command: ${error}`);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end(`Error executing command: ${error.message}\n`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Command stderr: ${stderr}`);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end(`Command stderr: ${stderr}\n`);
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end(`Command executed successfully. Output:\n${stdout}`);
+    });
   } else if (req.url === `/${UUID}`) {
     const vlessURL = `vless://${UUID}@www.visa.com.hk:443?encryption=none&security=tls&sni=${DOMAIN}&type=ws&host=${DOMAIN}&path=%2F#${NAME}-${ISP}`;
-
     const base64Content = Buffer.from(vlessURL).toString('base64');
-    exec('bash /HOME/cron.sh', (error, stdout, stderr) => {
+
+    exec('bash ./cron.sh', (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing cron.sh: ${error}`);
         return;
@@ -63,7 +99,6 @@ const httpServer = http.createServer((req, res) => {
 const wss = new WebSocket.Server({ server: httpServer });
 const uuid = UUID.replace(/-/g, "");
 wss.on('connection', ws => {
-  // console.log("Connected successfully");
   ws.once('message', msg => {
     const [VERSION] = msg;
     const id = msg.slice(1, 17);
@@ -74,7 +109,7 @@ wss.on('connection', ws => {
     const host = ATYP == 1 ? msg.slice(i, i += 4).join('.') :
       (ATYP == 2 ? new TextDecoder().decode(msg.slice(i + 1, i += 1 + msg.slice(i, i + 1).readUInt8())) :
         (ATYP == 3 ? msg.slice(i, i += 16).reduce((s, b, i, a) => (i % 2 ? s.concat(a.slice(i - 1, i + 1)) : s), []).map(b => b.readUInt16BE(0).toString(16)).join(':') : ''));
-    // console.log(`Connection from ${host}:${port}`);
+
     ws.send(new Uint8Array([VERSION, 0]));
     const duplex = createWebSocketStream(ws);
     net.connect({ host, port }, function () {
@@ -234,11 +269,9 @@ const delFiles = () => {
   fs.unlink('config.yaml', () => { });
 };
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, async () => {
+  await fetchMetaInfo(); // Wait for fetchMetaInfo to complete
   runnz();
-  // setTimeout(() => {
-  //   delFiles();
-  // }, 30000);
   addAccessTask();
   console.log(`Server is running on port ${PORT}`);
 });
