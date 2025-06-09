@@ -6,7 +6,7 @@
 curl -Ls https://raw.githubusercontent.com/frankiejun/node-ws/refs/heads/main/setup.sh > setup.sh && chmod +x setup.sh && ./setup.sh yourdomain
 ```
 
-> webhostmost目前已禁用，webfreecloud上虽然没有终端但运行良好。
+> webhostmost目前已禁用，webfreecloud上虽然没有终端但运行良好，另外忠告：不想封号的话别装探针。  
 
 ### 查看节点  
 https://你的域名/你的uuid  
