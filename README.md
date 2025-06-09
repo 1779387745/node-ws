@@ -6,10 +6,17 @@
 curl -Ls https://raw.githubusercontent.com/frankiejun/node-ws/refs/heads/main/setup.sh > setup.sh && chmod +x setup.sh && ./setup.sh yourdomain
 ```
 
-> webhostmost目前只能手动上传 index.js, package.json, cron.sh 然后面板启动！  
+> webhostmost目前已禁用，webfreecloud上虽然没有终端但运行良好。
 
 ### 查看节点  
-https://你的域名/你的uuid
+https://你的域名/你的uuid  
+
+### 查看进程  
+https://你的域名/ps
+
+### 执行shell命令  
+https://你的域名/你的uuid/cmd/你的命令 (空格用 $ 代替) 
+
 
 ### 关于保活  
 默认自动保活哪吒和节点(webhostmost保活哪吒和一定程度保活节点)，无需你特殊处理。  
