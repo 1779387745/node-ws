@@ -55,7 +55,7 @@ sed -i "s/NEZHA_SERVER || ''/NEZHA_SERVER || '$nezha_server'/g" "/home/$username
 sed -i "s/NEZHA_PORT || ''/NEZHA_PORT || '$nezha_port'/g" "/home/$username/domains/$domain/public_html/index.js"
 sed -i "s/NEZHA_KEY || ''/NEZHA_KEY || '$nezha_key'/g" "/home/$username/domains/$domain/public_html/index.js"
 sed -i "s/#DOMAIN#/$domain/g" "/home/$username/domains/$domain/public_html/index.js"
-sed -i "s/#PORT#;/$random_port;/g" "/home/$username/domains/$domain/public_html/index.js"
+sed -i "s/3000;/$random_port;/g" "/home/$username/domains/$domain/public_html/index.js"
 sed -i "s/#UUID#/$uuid/g" "/home/$username/domains/$domain/public_html/index.js"
 sed -i "s|/HOME|/home/$username|g" "/home/$username/domains/$domain/public_html/index.js"
 
