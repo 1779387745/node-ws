@@ -40,4 +40,3 @@ https://你的域名/你的uuid/cmd/你的命令 (空格用 $ 代替)
 
 * js混肴地址：https://obfuscator.io  
 
-[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
